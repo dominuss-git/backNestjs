@@ -1,25 +1,22 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class User {
+export class Department {
   @PrimaryGeneratedColumn()
   id: string;
-
-  @Column({ unique: true })
-  email: string;
 
   @Column()
   name: string;
 
   @Column()
-  password: string;
+  type: string;
 
   @Column()
-  surname: string;
+  bossId: string;
 
-  @Column()
-  skils: string;
+  @Column({ default: 1 })
+  count: number;
 
-  @Column()
-  addressId: string;
+  @Column({ default: Date.now().toString() })
+  date: string;
 }
