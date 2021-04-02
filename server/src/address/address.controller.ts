@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -7,11 +6,9 @@ import {
   HttpException,
   HttpStatus,
   Param,
-  Post,
 } from '@nestjs/common';
 
 import { AddressService } from './address.service';
-import { AddressDto } from './addressDto/address.dto';
 import { Address } from './scheme/address.entity';
 import * as logger from '../../config/logger';
 
@@ -40,20 +37,6 @@ export class AddressController {
       return this.addressService.find(id, usrId);
     } catch (e) {
       logger.error(`FROM address/:id GET ${usrId} -- ${e} STATUS 500`);
-      throw new HttpException(
-        'Internal Server Error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Post('/create')
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() address: AddressDto): Promise<Address> {
-    try {
-      return this.addressService.create(address);
-    } catch (e) {
-      logger.error(`FROM address/create POST ${address} -- ${e} STATUS 500`);
       throw new HttpException(
         'Internal Server Error',
         HttpStatus.INTERNAL_SERVER_ERROR,

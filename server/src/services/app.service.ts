@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
-import config from 'config';
+import * as config from 'config';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
@@ -18,7 +18,6 @@ export class AppService {
   ) {}
 
   registr(data: RegistrDto) {
-    console.log(data);
     return this.userService
       .checkByEmail(data.email)
       .then((usr) => {

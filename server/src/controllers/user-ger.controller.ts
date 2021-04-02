@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -11,7 +12,7 @@ import {
 import { AddressService } from 'src/address/address.service';
 import { User } from 'src/user/scheme/user.entity';
 import { UserService } from 'src/user/user.service';
-import { UserDto } from 'src/user/userDto/user.dto';
+import { UserChangeDto } from 'src/user/userDto/user.update.dto';
 
 import * as logger from '../../config/logger';
 
@@ -80,9 +81,20 @@ export class UserGerController {
       );
     }
   }
-  // @Put('/modify')
-  // @HttpCode(HttpStatus.OK)
-  // modify(@Param('id') id :string, @Body() data : UserDto()) : Promise<User> {
-  //   return this.userService.
-  // }
+
+  @Put('/modify')
+  @HttpCode(HttpStatus.OK)
+  modify(@Param('id') id: string, @Body() data: UserChangeDto) {
+    try {
+      return this.userService.change(id, data).then((id) => {
+        return this.addressService.change(id, data);
+      });
+    } catch (e) {
+      logger.error(`FROM user/:id/modify PUT -- ${e} STATUS 500`);
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

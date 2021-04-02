@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
-export class DepartamentDto {
+export class DepartmentDto {
   @IsNotEmpty()
   name: string;
 

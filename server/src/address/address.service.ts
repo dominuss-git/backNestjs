@@ -6,6 +6,7 @@ import { User } from '../user/scheme/user.entity';
 import { AddressDto } from './addressDto/address.dto';
 import { Address } from './scheme/address.entity';
 import * as logger from '../../config/logger';
+import { UserChangeDto } from 'src/user/userDto/user.update.dto';
 
 @Injectable()
 export class AddressService {
@@ -88,5 +89,31 @@ export class AddressService {
         };
       }
     });
+  }
+
+  change(id: string, data: UserChangeDto) {
+    return this.addressRepository
+      .update(
+        { id: id },
+        {
+          street: data.street,
+          home: data.home,
+          flat: data.flat,
+        },
+      )
+      .then((isChange) => {
+        if (isChange.affected === 1) {
+          return {
+            message: 'Data change',
+            status: HttpStatus.OK,
+          };
+        } else {
+          logger.error(`FROM address/:id PUT ${id} -- STATUS 500`);
+          throw new HttpException(
+            'Internal Server Error',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      });
   }
 }

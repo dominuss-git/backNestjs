@@ -7,6 +7,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from './scheme/user.entity';
 import { UserDto } from './userDto/user.dto';
 import * as logger from '../../config/logger';
+import { UserChangeDto } from './userDto/user.update.dto';
 
 @Injectable()
 export class UserService {
@@ -59,43 +60,25 @@ export class UserService {
     });
   }
 
-  async create(user: UserDto): Promise<User> {
-    user.password = await bcrypt.hash(user.password, 12);
-    return this.userRepository.save(user).then((usr) => {
-      if (!usr) {
-        logger.error(`FROM /create POST ${user} -- STATUS 500`);
-        throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        return usr;
-      }
-    });
+  create(user: UserDto): Promise<User> {
+    return bcrypt
+      .hash(user.password, 12)
+      .then((pswd) => {
+        user.password = pswd;
+        return this.userRepository.save(user);
+      })
+      .then((usr) => {
+        if (!usr) {
+          logger.error(`FROM /create POST ${user} -- STATUS 500`);
+          throw new HttpException(
+            'Internal Server Error',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        } else {
+          return usr;
+        }
+      });
   }
-
-  // change(user : UserDto) {
-  //   return this.userRepository.findOne({email: user.email })
-  //   .then(usr => {
-  //     if (!bcrypt.compare(usr.password, user.password)) {
-  //       throw new HttpException('Incorrect password', HttpStatus.BAD_REQUEST)
-  //     }
-
-  //     return this.userRepository.update({id : usr.id}, {
-  //       name: user.name,
-  //       surname: user.surname,
-  //       email : user.email,
-  //       skils: user.skils
-  //     })
-  //   })
-  //   .then(usr => {
-  //     if (!usr) {
-  //       throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR)
-  //     } else {
-  //       return usr
-  //     }
-  //   })
-  // }
 
   remove(id: string) {
     return this.userRepository.delete(id).then((isDeleted) => {
@@ -117,5 +100,49 @@ export class UserService {
         };
       }
     });
+  }
+
+  change(id: string, data: UserChangeDto) {
+    let addressId = null;
+    return this.userRepository
+      .findOne(id)
+      .then(async (usr) => {
+        addressId = usr.addressId;
+        const isMatch = await bcrypt.compare(data.password, usr.password);
+        if (!isMatch) {
+          throw new HttpException(
+            'Password is mismatch',
+            HttpStatus.BAD_REQUEST,
+          );
+        } else if (usr.email !== data.email) {
+          return this.checkByEmail(data.email);
+        }
+        return undefined;
+      })
+      .then((usr) => {
+        if (usr) {
+          throw new HttpException('Email busy', HttpStatus.BAD_REQUEST);
+        }
+        return this.userRepository
+          .update(id, {
+            name: data.name,
+            surname: data.surname,
+            email: data.email,
+            skils: data.skils,
+          })
+          .then((isUpdated) => {
+            return { ...isUpdated, id: addressId };
+          });
+      })
+      .then((isUpdated) => {
+        if (isUpdated.affected === 1) {
+          return isUpdated.id;
+        } else {
+          throw new HttpException(
+            'Interanl Server Error',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      });
   }
 }

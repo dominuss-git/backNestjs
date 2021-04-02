@@ -48,6 +48,29 @@ export class DepartmentService {
     });
   }
 
+  changeBoss(id: string, bossId: string) {
+    return this.departmentRepository
+      .update(
+        { id: id },
+        {
+          bossId: bossId,
+        },
+      )
+      .then((isChange) => {
+        if (isChange.affected === 1) {
+          return {
+            message: 'Boss is change',
+            status: HttpStatus.OK,
+          };
+        } else {
+          throw new HttpException(
+            'Internal Server Error',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+      });
+  }
+
   remove(id: string) {
     return this.departmentRepository.delete(id).then((isDeleted) => {
       if (!isDeleted) {

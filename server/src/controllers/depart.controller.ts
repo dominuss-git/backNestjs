@@ -8,15 +8,17 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
 } from '@nestjs/common';
 import { DepartmentService } from 'src/department/department.service';
-import { DepartamentDto } from 'src/controllers/depsDto/deps.dto';
+import { DepartmentDto } from 'src/controllers/depsDto/deps.dto';
 import { UserService } from 'src/user/user.service';
 import { WorkersService } from 'src/workers/workers.service';
 
 import * as logger from '../../config/logger';
+import { Workers } from 'src/workers/scheme/workers.entity';
 
-@Controller('departament')
+@Controller('department')
 export class DepartController {
   constructor(
     private departmentService: DepartmentService,
@@ -24,34 +26,95 @@ export class DepartController {
     private userService: UserService,
   ) {}
 
-  // @Get()
-  // @HttpCode(HttpStatus.OK)
-  // findAll() {
-  //   return this.departmentService.findAll().then((deps) => {
-  //     if (!deps) {
-  //       throw new HttpException(
-  //         'Internal Server Error',
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     } else {
-  //       const user = [];
-  //       deps.map((val, i) => {
-  //         this.workersService.findAll(val.id).then((workers) => {
-  //           workers.map((value, j) => {
-  //             this.userService.find(value.userId).then((usr) => {
-  //               user.push(usr);
-  //             });
-  //           });
-  //         });
-  //       });
-  //       return user;
-  //     }
-  //   });
-  // }
+  @Put('/:id')
+  @HttpCode(HttpStatus.OK)
+  modify(@Param('id') id: string, @Body() email): Promise<Workers> {
+    try {
+      console.log(email.email);
+      return this.userService
+        .findByEmail(email.email)
+        .then((usr) => {
+          console.log(usr);
+          if (!usr) {
+            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+          } else {
+            console.log(usr.id, id);
+            return this.workersService.find(usr.id, id).then((worker) => {
+              console.log(worker);
+              if (worker) {
+                throw new HttpException(
+                  'User is worker on this department yet',
+                  HttpStatus.BAD_REQUEST,
+                );
+              }
+              return usr.id;
+            });
+          }
+        })
+        .then((userId) => {
+          return this.workersService.create({
+            userId: userId,
+            departmentId: id,
+          });
+        });
+    } catch (e) {
+      logger.error(`FROM departament/:id PUT ${id} -- ${e} STATUS 500`);
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('/:id')
+  @HttpCode(HttpStatus.OK)
+  find(@Param('id') id: string) {
+    try {
+      return this.departmentService
+        .find(id)
+        .then((dep) => {
+          return this.workersService.findAll(id).then((workers) => {
+            return { workers, dep };
+          });
+        })
+        .then((data) => {
+          const promices = [];
+
+          for (const val of data.workers) {
+            promices.push(this.userService.find(val.userId));
+          }
+
+          return Promise.all(promices).then((val) => {
+            return {
+              ...data.dep,
+              users: val,
+            };
+          });
+        });
+    } catch (e) {
+      logger.error(`FROM departament/:id GET ${id} -- ${e} STATUS 500`);
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  Get() {
+    return this.departmentService.findAll().then((deps) => {
+      const promises = [];
+      for (const val of deps) {
+        promises.push(this.find(val.id));
+      }
+      return Promise.all(promises);
+    });
+  }
 
   @Post('/create')
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() data: DepartamentDto) {
+  create(@Body() data: DepartmentDto) {
     try {
       return this.userService
         .findByEmail(data.bossEmail)
@@ -93,14 +156,14 @@ export class DepartController {
 
   @Delete('/:id')
   @HttpCode(HttpStatus.OK)
-  remove(@Param('id') id: string, @Body() userId: string) {
+  remove(@Param('id') id: string, @Body() userId) {
     try {
       return this.departmentService
         .find(id)
         .then((dep) => {
-          if (dep.bossId !== userId) {
+          if (dep.bossId !== userId.userId) {
             throw new HttpException(
-              'You must be boos on this department',
+              'You must be boss on this department',
               HttpStatus.BAD_REQUEST,
             );
           } else {

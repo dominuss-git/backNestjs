@@ -27,6 +27,13 @@ export class WorkersService {
     });
   }
 
+  find(userId: string, depId: string) {
+    return this.workersRepository.findOne({
+      userId: userId,
+      departmentId: depId,
+    });
+  }
+
   create(data: WorkersDto): Promise<Workers> {
     return this.workersRepository.save(data).then((worker) => {
       if (!worker) {

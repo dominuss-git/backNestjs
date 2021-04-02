@@ -1,19 +1,18 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpException,
   HttpStatus,
   Param,
-  Post,
+  Put,
 } from '@nestjs/common';
 
 import { User } from './scheme/user.entity';
 import { UserService } from './user.service';
-import { UserDto } from './userDto/user.dto';
 import * as logger from '../../config/logger';
+import { UserChangeDto } from './userDto/user.update.dto';
 
 @Controller('user')
 export class UserController {
@@ -33,6 +32,20 @@ export class UserController {
     }
   }
 
+  @Put('/:id')
+  @HttpCode(HttpStatus.OK)
+  modify(@Param('id') id: string, @Body() data: UserChangeDto) {
+    try {
+      return this.userService.change(id, data);
+    } catch (e) {
+      logger.error(`FROM / PUT ${id} -- ${e} STATUS 500`);
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   find(@Param('id') id: string): Promise<User> {
@@ -40,34 +53,6 @@ export class UserController {
       return this.userService.find(id);
     } catch (e) {
       logger.error(`FROM /:id GET ${id} -- ${e} STATUS 500`);
-      throw new HttpException(
-        'Internal Server Error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Post('create')
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() user: UserDto) {
-    try {
-      return this.userService.create(user);
-    } catch (e) {
-      logger.error(`FROM /create POST ${user.email} -- ${e} STATUS 500`);
-      throw new HttpException(
-        'Internal Server Error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.OK)
-  remove(@Param('id') id: string) {
-    try {
-      return this.userService.remove(id);
-    } catch (e) {
-      logger.error(`FROM /:id DELETE ${id} -- ${e} STATUS 500`);
       throw new HttpException(
         'Internal Server Error',
         HttpStatus.INTERNAL_SERVER_ERROR,
