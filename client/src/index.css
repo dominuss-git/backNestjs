@@ -1,0 +1,15 @@
+.small {
+  width: 10px!important;
+}
+.big {
+  width: 150px!important;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.link {
+  text-decoration: none;
+  color: black;
+}

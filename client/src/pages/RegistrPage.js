@@ -1,9 +1,18 @@
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { NavLink } from 'react-router-dom'
 import { Loader } from '../components/Loader'
+import { useAuth } from '../hooks/auth.hook'
+import { useHttp } from '../hooks/http.hook'
+import { useMessage } from '../hooks/message.hook'
 
 export const RegistrPage = () => {
+  const dispatch = useDispatch()
+  const message = useMessage()
+  const {request} = useHttp()
   let loading = useSelector(state => state.app.loading)
+  const {login} = useAuth()
+
 
   const [form, setForm] = useState({
     email: '',
@@ -18,9 +27,25 @@ export const RegistrPage = () => {
     setForm({...form, [event.target.name]: event.target.value})
   }
 
+  const onRegistr = async () => {
+    console.log(form)
+    const data = await request('/registr', 'POST', {...form})
+      if (data.status === 400) {
+        let mes = ''
+        for (let mem of data.body.message) {
+          mes += mem 
+          mes += ', '
+        }
+        message(mes)
+      } else if (data.status === 200) {
+        console.log(data)
+        login(data.body.token, data.body.userId)
+      }
+  }
+
   return (
     <form className="mt-5 pt-5 w-30">
-      <span className="form-label pb-5 bolder fs-2" id="basic-addon1">Authentification</span>
+      <span className="form-label pb-5 bolder fs-2" id="basic-addon1">Registration</span>
       <div className="input-group mb-3 mt-5">
         <span className="input-group-text" id="basic-addon1">email</span>
         <input 
@@ -29,6 +54,18 @@ export const RegistrPage = () => {
           placeholder="Email" 
           name="email"
           aria-label="Email" 
+          aria-describedby="basic-addon1"
+          onChange={changeHandler} 
+          />
+      </div>
+      <div className="input-group mb-3">
+        <span className="input-group-text" id="basic-addon1">Skils</span>
+        <input 
+          type="text" 
+          className="form-control" 
+          placeholder="Skils" 
+          name="skils"
+          aria-label="Skils" 
           aria-describedby="basic-addon1"
           onChange={changeHandler} 
           />
@@ -45,6 +82,7 @@ export const RegistrPage = () => {
           name='name'
           aria-label="Name" 
           aria-describedby="basic-addon1" 
+          onChange={changeHandler} 
         />
         <span className="input-group-text" id="basic-addon1">Surname</span>
         <input 
@@ -54,25 +92,14 @@ export const RegistrPage = () => {
           name="surname"
           aria-label="Surname" 
           aria-describedby="basic-addon1" 
+          onChange={changeHandler} 
         />
-      </div>
-      <div className="input-group mb-3">
-        <span className="input-group-text" id="basic-addon1">Password</span>
-        <input 
-          type="password" 
-          className="form-control" 
-          placeholder="Password" 
-          name="password"
-          aria-label="Password" 
-          aria-describedby="basic-addon1" 
-          onChange={changeHandler}
-          />
       </div>
       <div className="input-group mb-3">
         <span className="input-group-text" id="basic-addon1">Street</span>
         <input 
           type="text" 
-          className="form-control" 
+          className="form-control big" 
           placeholder="Street" 
           name="street"
           aria-label="Street" 
@@ -85,7 +112,7 @@ export const RegistrPage = () => {
           >Home</span>
           <input 
             type="number" 
-            className="form-control" 
+            className="form-control small" 
             placeholder="Home" 
             name="home"
             aria-label="Home" 
@@ -93,18 +120,55 @@ export const RegistrPage = () => {
             onChange={changeHandler}
             />
           <span 
-            className="input-group-text w-" 
+            className="input-group-text" 
             id="basic-addon1"
           >Flat</span>
           <input 
             type="number" 
-            className="form-control w-5" 
+            className="form-control small" 
             placeholder="Flat" 
-            name="Flat"
+            name="flat"
             aria-label="Flat" 
             aria-describedby="basic-addon1" 
             onChange={changeHandler}
             />
+      </div>
+      <div className="input-group mb-3">
+        <span className="input-group-text" id="basic-addon1">Password</span>
+        <input 
+          type="password" 
+          className="form-control" 
+          placeholder="Password" 
+          name="password"
+          aria-label="Password" 
+          aria-describedby="basic-addon1" 
+          onChange={changeHandler}
+          />
+          <span className="input-group-text" id="basic-addon1">Confirm</span>
+          <input 
+            type="password" 
+            className="form-control" 
+            placeholder="Password" 
+            name="confirnPassword"
+            aria-label="Password" 
+            aria-describedby="basic-addon1" 
+            onChange={changeHandler}
+            />
+      </div>
+      <div 
+        className="btn-group d-flex justify-start w-75" 
+        role="group" 
+        aria-label="Basic outlined example"
+        >
+        <button 
+          type="button"
+          className="btn btn-primary"
+          onClick={onRegistr}
+          >Sign up</button>
+        <NavLink 
+          className="btn btn-dark"
+          to="/login"
+          >Sign in</NavLink>
       </div>
     </form>
   )

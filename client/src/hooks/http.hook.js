@@ -6,6 +6,9 @@ export const useHttp = () => {
 
   const request = useCallback(async (url, method = 'GET', body = null, headers ={}) => {
     setLoading(true)
+
+    url = 'http://192.168.31.5:5000' + url
+
     try {
       if(body) {
         body = JSON.stringify(body)
@@ -14,7 +17,7 @@ export const useHttp = () => {
 
       const response = await fetch(url, {
         method, 
-        body, 
+        body,
         headers
       })
 
@@ -24,8 +27,8 @@ export const useHttp = () => {
       return data
 
     } catch(e) {
-      setLoading(false)
-      setError(e.message)
+      // setLoading(false)
+      // setError(e.message)
       throw e
     }
   }, [])

@@ -1,7 +1,14 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../hooks/auth.hook'
 
 export const NavBar = () => {
+  const auth = useAuth()
+  const logoutHandler = event => {
+    event.preventDefault()
+    auth.logout()
+    // history.push('/')
+  }
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -20,6 +27,9 @@ export const NavBar = () => {
             </li>
             <li className="nav-item">
               <NavLink className="nav-link" to="/workers">Workers</NavLink>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link end-0" onClick={logoutHandler}>Logout</a>
             </li>
           </ul>
         </div>

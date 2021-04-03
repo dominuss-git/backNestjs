@@ -1,9 +1,10 @@
 import {useCallback} from 'react'
+import { useDispatch } from 'react-redux'
+import { showAlert } from '../redux/actions/app.actions'
 
 export const useMessage = () => {
+  const dispatch = useDispatch()
   return useCallback(text => {
-    if (window.M && text) {
-      window.M.toast({ html : text })
-    }
+    dispatch(showAlert(text))
   }, [])
 }

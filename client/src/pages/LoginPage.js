@@ -1,15 +1,18 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { NavLink } from 'react-router-dom'
 import { Loader } from '../components/Loader'
+import { useAuth } from '../hooks/auth.hook'
 import { useHttp } from '../hooks/http.hook'
 import { useMessage } from '../hooks/message.hook'
-import { login } from '../redux/actions/login.actions'
+import { hideLoader, showLoader } from '../redux/actions/app.actions'
 
 export const LoginPage = () => {
   const dispatch = useDispatch()
   const message = useMessage()
   const {request} = useHttp()
   let loading = useSelector(state => state.app.loading)
+  const {login} = useAuth()
 
   const [form, setForm] = useState({
     email: '',
@@ -25,12 +28,21 @@ export const LoginPage = () => {
   }
 
 
-  const onLogin = () => {
-    const data = {
-      message : 'hello'
-    }
-    message(data.message)
-    // const data = await request('http:/localhost/5000/login', 'POST', {...form})
+  const onLogin = async () => {
+    dispatch(showLoader())
+    const data = await request('/login', 'POST', {...form})
+      if (data.status === 400) {
+        let mes = ''
+        for (let mem of data.body.message) {
+          mes += mem 
+          mes += '\n'
+        }
+
+        message(mes)
+      } else if (data.status === 200) {
+        login(data.body.token, data.body.userId)
+      }
+      dispatch(hideLoader())
   }
 
   return (
@@ -70,10 +82,10 @@ export const LoginPage = () => {
           className="btn btn-primary"
           onClick={onLogin}
           >Sign in</button>
-        <button 
-          type="button" 
+        <NavLink 
           className="btn btn-dark"
-          >Sign up</button>
+          to="/registr"
+          >Sign up</NavLink>
       </div>
     </form>
   )

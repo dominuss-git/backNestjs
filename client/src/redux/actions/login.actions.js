@@ -1,23 +1,15 @@
-import { hideLoader, showLoader } from "./loader.actions"
+import { LOGIN, LOGOUT } from "../types"
 
-export function login() {
-  return async dispatch => {
-    try {
-      dispatch(showLoader())
-      setTimeout(() => {
-        dispatch(hideLoader())
-      }, 2000)
-      return {
-        
-      }
-    } catch (e) {
-      
-    }
+export function loginR(form) {
+  console.log(form)
+  return {
+    type : LOGIN,
+    payload: { ...form }
   }
 }
 
-// export function hideLoader() {
-//   return {
-//     type: HIDE_LOADER
-//   }
-// }
+export function logoutR() {
+  return {
+    type : LOGOUT
+  }
+}
