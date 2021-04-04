@@ -42,11 +42,13 @@ export const Department = ({ data }) => {
         <div className="ms-2 me-auto">
           <div className="fw-bold">{data.name}</div>
           <div className="fw-bold">
-            Type :
+            Type : 
+            {' '}
             {data.type}
           </div>
           <div className="fw-bold">
             Boss :
+            {' '}
             {boss.email}
           </div>
         </div>

@@ -8,14 +8,14 @@ export const UserPage = () => {
   const id = (history.location.pathname.split('/'))[2];
   const { request, loading } = useHttp();
   const [user, setUser] = useState(undefined);
-
-  let date = new Date(user.date);
-  date = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+  const [date, setDate] = useState()
 
   const getUser = async () => {
     const data = await request(`/user/${id}/data`, 'GET');
     if (data.status === 200) {
       setUser(data.body);
+      const date_f = new Date(data.body.date);
+      setDate(`${date_f.getDate()}.${date_f.getMonth() + 1}.${date_f.getFullYear()}`);
     }
   };
 

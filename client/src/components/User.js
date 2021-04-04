@@ -24,6 +24,7 @@ export const User = ({ user, numbering }) => {
                   {pos.name}
                   {' '}
                   :
+                  {' '}
                   {pos.position}
                 </NavLink>
               </li>
@@ -37,6 +38,7 @@ export const User = ({ user, numbering }) => {
           {user.dep[0].name}
           {' '}
           :
+          {' '}
           {user.dep[0].position}
         </NavLink>
         )}
