@@ -22,4 +22,7 @@ export class User {
 
   @Column()
   addressId: string;
+
+  @Column({ type: 'date', default: new Date(Date.now()) })
+  date: Date;
 }

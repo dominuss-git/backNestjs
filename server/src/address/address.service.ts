@@ -36,7 +36,6 @@ export class AddressService {
       .findOne(userId)
       .then((usr) => {
         if (usr.addressId !== id) {
-          console.log(usr, id);
           logger.error(
             `FROM address/:id GET ${userId} -- unathorization access STATUS ${HttpStatus.UNAUTHORIZED}`,
           );

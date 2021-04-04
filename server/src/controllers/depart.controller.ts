@@ -30,17 +30,13 @@ export class DepartController {
   @HttpCode(HttpStatus.OK)
   modify(@Param('id') id: string, @Body() email): Promise<Workers> {
     try {
-      console.log(email.email);
       return this.userService
         .findByEmail(email.email)
         .then((usr) => {
-          console.log(usr);
           if (!usr) {
             throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
           } else {
-            console.log(usr.id, id);
             return this.workersService.find(usr.id, id).then((worker) => {
-              console.log(worker);
               if (worker) {
                 throw new HttpException(
                   'User is worker on this department yet',
@@ -59,6 +55,47 @@ export class DepartController {
         });
     } catch (e) {
       logger.error(`FROM departament/:id PUT ${id} -- ${e} STATUS 500`);
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Put('/:id/change')
+  @HttpCode(HttpStatus.OK)
+  changeBoss(@Param('id') id: string, @Body() email) {
+    try {
+      return this.userService
+        .checkByEmail(email.email)
+        .then((usr) => {
+          if (!usr) {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+          } else {
+            return this.workersService.find(usr.id, id).then((worker) => {
+              if (!worker) {
+                throw new HttpException(
+                  "User didn't work on this department",
+                  HttpStatus.BAD_REQUEST,
+                );
+              }
+              return this.departmentService.changeBoss(id, usr.id);
+            });
+          }
+        })
+        .then((isChange) => {
+          if (isChange.status === 200) {
+            return isChange;
+          } else {
+            logger.error(`FROM departament/:id/change PUT ${id} -- STATUS 500`);
+            throw new HttpException(
+              'Internal Server Error',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+          }
+        });
+    } catch (e) {
+      logger.error(`FROM departament/:id/change PUT ${id} -- ${e} STATUS 500`);
       throw new HttpException(
         'Internal Server Error',
         HttpStatus.INTERNAL_SERVER_ERROR,

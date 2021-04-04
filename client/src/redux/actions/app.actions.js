@@ -1,31 +1,33 @@
-import { SHOW_LOADER, HIDE_LOADER, HIDE_ALERT, SHOW_ALERT } from "../types"
+import {
+  SHOW_LOADER, HIDE_LOADER, HIDE_ALERT, SHOW_ALERT,
+} from '../types';
 
 export function showLoader() {
   return {
-    type: SHOW_LOADER
-  }
+    type: SHOW_LOADER,
+  };
 }
 
 export function hideLoader() {
   return {
-    type: HIDE_LOADER
-  }
+    type: HIDE_LOADER,
+  };
 }
 
 export function showAlert(text) {
-  return dispatch => {
+  return (dispatch) => {
     dispatch({
       type: SHOW_ALERT,
-      payload: text
-    })
+      payload: text,
+    });
     setTimeout(() => {
-      dispatch(hideAlert())
-    }, 3000)
-  }
+      dispatch(hideAlert());
+    }, 3000);
+  };
 }
 
 export function hideAlert() {
   return {
     type: HIDE_ALERT,
-  }
+  };
 }

@@ -1,21 +1,20 @@
-import { LOGIN, LOGOUT } from "../types"
+import { LOGIN, LOGOUT } from '../types';
 
-const InitialState = { 
-  id : null,
-  token : null,
-  isAdmin : false
-}
+const InitialState = {
+  id: null,
+  token: null,
+  isAdmin: false,
+};
 
-export const loginReducer = (state=InitialState, action) => {
+export const loginReducer = (state = InitialState, action) => {
   switch (action.type) {
     case LOGIN:
-      return {...state, id : action.payload.id, token : action.payload.token}
+      return { ...state, id: action.payload.id, token: action.payload.token };
 
     case LOGOUT:
-      return {...state, id : null, token: null}
+      return { ...state, id: null, token: null };
 
     default:
-      return state
+      return state;
   }
-  
-}
+};

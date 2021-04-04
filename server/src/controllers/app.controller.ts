@@ -20,7 +20,6 @@ export class AppController {
   @Post('/login')
   @HttpCode(HttpStatus.OK)
   login(@Body() data: LoginDto) {
-    console.log(data)
     try {
       return this.appService.login(data);
     } catch (e) {

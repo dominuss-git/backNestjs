@@ -17,6 +17,6 @@ export class Department {
   @Column({ default: 1 })
   count: number;
 
-  @Column({ default: Date.now().toString() })
-  date: string;
+  @Column({ type: 'date', default: new Date(Date.now()) })
+  date: Date;
 }
