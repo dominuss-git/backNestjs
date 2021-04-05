@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Department } from './scheme/department.entity';
-import { DepDto } from './departmentDTO/department.dto';
+import { DepartmentDto } from './departmentDto/department.dto';
 import * as logger from '../../config/logger';
 
 @Injectable()
@@ -15,9 +15,12 @@ export class DepartmentService {
   findAll(): Promise<Department[]> {
     return this.departmentRepository.find().then((department) => {
       if (!department) {
+        logger.error(
+          `FROM departament/ GET -- STATUS ${HttpStatus.NOT_FOUND}`,
+        );
         throw new HttpException(
-          'Iternal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          'Departments not found',
+          HttpStatus.NOT_FOUND,
         );
       } else {
         return department;
@@ -28,6 +31,9 @@ export class DepartmentService {
   find(id: string): Promise<Department> {
     return this.departmentRepository.findOne(id).then((department) => {
       if (!department) {
+        logger.error(
+          `FROM departament/:id GET -- STATUS ${HttpStatus.NOT_FOUND}`,
+        );
         throw new HttpException('Department not found', HttpStatus.NOT_FOUND);
       } else {
         return department;
@@ -35,12 +41,15 @@ export class DepartmentService {
     });
   }
 
-  create(data: DepDto): Promise<Department> {
+  create(data: DepartmentDto): Promise<Department> {
     return this.departmentRepository.save(data).then((department) => {
       if (!department) {
+        logger.error(
+          `FROM departament/ POST -- STATUS ${HttpStatus.NOT_FOUND}`,
+        );
         throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          "Department is't create" ,
+          HttpStatus.NOT_FOUND,
         );
       } else {
         return department;
@@ -63,9 +72,12 @@ export class DepartmentService {
             status: HttpStatus.OK,
           };
         } else {
+          logger.error(
+            `FROM departament/:id PUT -- STATUS ${HttpStatus.NOT_FOUND}`,
+          );
           throw new HttpException(
-            'Internal Server Error',
-            HttpStatus.INTERNAL_SERVER_ERROR,
+            "Boss isn't changed",
+            HttpStatus.NOT_FOUND,
           );
         }
       });
@@ -73,13 +85,7 @@ export class DepartmentService {
 
   remove(id: string) {
     return this.departmentRepository.delete(id).then((isDeleted) => {
-      if (!isDeleted) {
-        logger.error(`FROM departament/:id DELETE -- NOT FOUND STATUS 500`);
-        throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else if (isDeleted.affected === 0) {
+      if (isDeleted.affected === 0) {
         logger.error(
           `FROM departament/:id DELETE -- STATUS ${HttpStatus.NOT_FOUND}`,
         );

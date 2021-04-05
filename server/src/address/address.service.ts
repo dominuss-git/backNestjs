@@ -20,10 +20,10 @@ export class AddressService {
   findAll(): Promise<Address[]> {
     return this.addressRepository.find().then((addr) => {
       if (!addr) {
-        logger.error(`FROM address/ GET ${addr} -- NOT FOUND STATUS 500`);
+        logger.error(`FROM address/ GET ${addr} -- NOT FOUND STATUS 404`);
         throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          'Adress not found',
+          HttpStatus.NOT_FOUND,
         );
       } else {
         return addr;
@@ -35,7 +35,7 @@ export class AddressService {
     return this.userRepository
       .findOne(userId)
       .then((usr) => {
-        if (usr.addressId !== id) {
+        if (usr.addressId.id !== id) {
           logger.error(
             `FROM address/:id GET ${userId} -- unathorization access STATUS ${HttpStatus.UNAUTHORIZED}`,
           );
@@ -68,15 +68,7 @@ export class AddressService {
 
   remove(userId: string, id: string) {
     return this.addressRepository.delete(id).then((isDeleted) => {
-      if (!isDeleted) {
-        logger.error(
-          `FROM address/:id DELETE ${userId} -- NOT FOUND STATUS 500`,
-        );
-        throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else if (isDeleted.affected === 0) {
+      if (isDeleted.affected === 0) {
         logger.error(
           `FROM address/:id DELETE ${userId} -- STATUS ${HttpStatus.NOT_FOUND}`,
         );
@@ -107,10 +99,10 @@ export class AddressService {
             status: HttpStatus.OK,
           };
         } else {
-          logger.error(`FROM address/:id PUT ${id} -- STATUS 500`);
+          logger.error(`FROM address/:id PUT ${id} -- STATUS 404`);
           throw new HttpException(
-            'Internal Server Error',
-            HttpStatus.INTERNAL_SERVER_ERROR,
+            "User isn't change",
+            HttpStatus.NOT_FOUND,
           );
         }
       });

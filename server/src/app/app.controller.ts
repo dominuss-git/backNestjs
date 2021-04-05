@@ -7,7 +7,7 @@ import {
   Post,
 } from '@nestjs/common';
 
-import { AppService } from '../services/app.service';
+import { AppService } from './app.service';
 import { LoginDto } from './authDto/login.dto';
 import { RegistrDto } from './authDto/registr.dto';
 

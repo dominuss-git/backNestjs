@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Address } from 'src/address/scheme/address.entity';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -20,8 +21,9 @@ export class User {
   @Column()
   skils: string;
 
-  @Column()
-  addressId: string;
+  @OneToOne(() => Address)
+  @JoinColumn()
+  addressId: Address;
 
   @Column({ type: 'date', default: new Date(Date.now()) })
   date: Date;

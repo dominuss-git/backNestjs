@@ -9,21 +9,21 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
-import { Workers } from './scheme/workers.entity';
-import { WorkersService } from './workers.service';
-import { WorkersDto } from './workersDro/workers.dto';
+import { Employee } from './scheme/employee.entity';
+import { EmployeeService } from './employee.service';
+import { EmployeeDto } from './employeeDto/employee.dto';
 
 import * as logger from '../../config/logger';
 
 @Controller('/department/:dep/workers')
-export class WorkersController {
-  constructor(private workersService: WorkersService) {}
+export class EmployeeController {
+  constructor(private employeeService: EmployeeService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(@Param('dep') id: string): Promise<Workers[]> {
+  findAll(@Param('dep') id: string): Promise<Employee[]> {
     try {
-      return this.workersService.findAll(id);
+      return this.employeeService.findAll(id);
     } catch (e) {
       logger.error(`FROM department/ GET ALL -- ${e} STATUS 500`);
       throw new HttpException(
@@ -35,9 +35,9 @@ export class WorkersController {
 
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() data: WorkersDto): Promise<Workers> {
+  create(@Body() data: EmployeeDto): Promise<Employee> {
     try {
-      return this.workersService.create(data);
+      return this.employeeService.create(data);
     } catch (e) {
       logger.error(`FROM department/create POST -- ${e} STATUS 500`);
       throw new HttpException(
@@ -51,7 +51,7 @@ export class WorkersController {
   @HttpCode(HttpStatus.OK)
   remove(@Param('id') id: string, @Param('dep') depId: string) {
     try {
-      return this.workersService.remove(id, depId);
+      return this.employeeService.remove(id, depId);
     } catch (e) {
       logger.error(`FROM department/:id DELETE ${id} -- ${e} STATUS 500`);
       throw new HttpException(

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpException,
@@ -13,10 +14,14 @@ import { User } from './scheme/user.entity';
 import { UserService } from './user.service';
 import * as logger from '../../config/logger';
 import { UserChangeDto } from './userDto/user.update.dto';
+import { AddressService } from 'src/address/address.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private addressService: AddressService
+  ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -32,13 +37,13 @@ export class UserController {
     }
   }
 
-  @Put('/:id')
+  @Get(':id')
   @HttpCode(HttpStatus.OK)
-  modify(@Param('id') id: string, @Body() data: UserChangeDto) {
+  find(@Param('id') id: string) {
     try {
-      return this.userService.change(id, data);
+      return this.userService.find(id);
     } catch (e) {
-      logger.error(`FROM / PUT ${id} -- ${e} STATUS 500`);
+      logger.error(`FROM /:id GET ${id} -- ${e} STATUS 500`);
       throw new HttpException(
         'Internal Server Error',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -46,13 +51,48 @@ export class UserController {
     }
   }
 
-  @Get(':id')
+  @Get('/:id/data')
   @HttpCode(HttpStatus.OK)
-  find(@Param('id') id: string): Promise<User> {
+  getData(@Param('id') id: string) {
     try {
-      return this.userService.find(id);
+      return this.userService.find(id)
     } catch (e) {
-      logger.error(`FROM /:id GET ${id} -- ${e} STATUS 500`);
+      logger.error(`FROM user/:id/data GET -- ${e} STATUS 500`);
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete('/:id/delete')
+  @HttpCode(HttpStatus.OK)
+  remove(@Param('id') id: string) {
+    try {
+      return this.userService
+        .find(id)
+        .then((usr) => {
+          return this.addressService.remove(id, usr.addressId);
+        })
+        .then(() => {
+          return this.userService.remove(id);
+        });
+    } catch (e) {
+      logger.error(`FROM user/:id/delete GET -- ${e} STATUS 500`);
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Put('/:id/modify')
+  @HttpCode(HttpStatus.OK)
+  modify(@Param('id') id: string, @Body() data: UserChangeDto) {
+    try {
+      return this.userService.change(id, data);
+    } catch (e) {
+      logger.error(`FROM user/:id/modify PUT -- ${e} STATUS 500`);
       throw new HttpException(
         'Internal Server Error',
         HttpStatus.INTERNAL_SERVER_ERROR,
