@@ -14,13 +14,13 @@ import { User } from './scheme/user.entity';
 import { UserService } from './user.service';
 import * as logger from '../../config/logger';
 import { UserChangeDto } from './userDto/user.update.dto';
-import { AddressService } from 'src/address/address.service';
+import { AddressService } from '../address/address.service';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private addressService: AddressService
+    private addressService: AddressService,
   ) {}
 
   @Get()
@@ -55,7 +55,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   getData(@Param('id') id: string) {
     try {
-      return this.userService.find(id)
+      return this.userService.find(id);
     } catch (e) {
       logger.error(`FROM user/:id/data GET -- ${e} STATUS 500`);
       throw new HttpException(

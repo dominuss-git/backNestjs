@@ -6,7 +6,7 @@ import { User } from '../user/scheme/user.entity';
 import { AddressDto } from './addressDto/address.dto';
 import { Address } from './scheme/address.entity';
 import * as logger from '../../config/logger';
-import { UserChangeDto } from 'src/user/userDto/user.update.dto';
+import { UserChangeDto } from '../user/userDto/user.update.dto';
 
 @Injectable()
 export class AddressService {
@@ -21,10 +21,7 @@ export class AddressService {
     return this.addressRepository.find().then((addr) => {
       if (!addr) {
         logger.error(`FROM address/ GET ${addr} -- NOT FOUND STATUS 404`);
-        throw new HttpException(
-          'Adress not found',
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('Adress not found', HttpStatus.NOT_FOUND);
       } else {
         return addr;
       }
@@ -100,10 +97,7 @@ export class AddressService {
           };
         } else {
           logger.error(`FROM address/:id PUT ${id} -- STATUS 404`);
-          throw new HttpException(
-            "User isn't change",
-            HttpStatus.NOT_FOUND,
-          );
+          throw new HttpException("User isn't change", HttpStatus.NOT_FOUND);
         }
       });
   }

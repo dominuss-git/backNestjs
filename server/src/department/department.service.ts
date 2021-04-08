@@ -15,13 +15,8 @@ export class DepartmentService {
   findAll(): Promise<Department[]> {
     return this.departmentRepository.find().then((department) => {
       if (!department) {
-        logger.error(
-          `FROM departament/ GET -- STATUS ${HttpStatus.NOT_FOUND}`,
-        );
-        throw new HttpException(
-          'Departments not found',
-          HttpStatus.NOT_FOUND,
-        );
+        logger.error(`FROM departament/ GET -- STATUS ${HttpStatus.NOT_FOUND}`);
+        throw new HttpException('Departments not found', HttpStatus.NOT_FOUND);
       } else {
         return department;
       }
@@ -41,46 +36,37 @@ export class DepartmentService {
     });
   }
 
-  create(data: DepartmentDto): Promise<Department> {
+  async create(data: DepartmentDto): Promise<Department> {
     return this.departmentRepository.save(data).then((department) => {
       if (!department) {
         logger.error(
           `FROM departament/ POST -- STATUS ${HttpStatus.NOT_FOUND}`,
         );
-        throw new HttpException(
-          "Department is't create" ,
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException("Department is't create", HttpStatus.NOT_FOUND);
       } else {
         return department;
       }
     });
   }
 
-  changeBoss(id: string, bossId: string) {
-    return this.departmentRepository
-      .update(
-        { id: id },
-        {
-          bossId: bossId,
-        },
-      )
-      .then((isChange) => {
-        if (isChange.affected === 1) {
-          return {
-            message: 'Boss is change',
-            status: HttpStatus.OK,
-          };
-        } else {
-          logger.error(
-            `FROM departament/:id PUT -- STATUS ${HttpStatus.NOT_FOUND}`,
-          );
-          throw new HttpException(
-            "Boss isn't changed",
-            HttpStatus.NOT_FOUND,
-          );
-        }
-      });
+  async changeBoss(id: string, bossId: string) {
+    const isChange = await this.departmentRepository.update(
+      { id: id },
+      {
+        bossId: bossId,
+      },
+    );
+    if (isChange.affected === 1) {
+      return {
+        message: 'Boss is change',
+        status: HttpStatus.OK,
+      };
+    } else {
+      logger.error(
+        `FROM departament/:id PUT -- STATUS ${HttpStatus.NOT_FOUND}`,
+      );
+      throw new HttpException("Boss isn't changed", HttpStatus.NOT_FOUND);
+    }
   }
 
   remove(id: string) {

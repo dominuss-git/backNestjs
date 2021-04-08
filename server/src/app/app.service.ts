@@ -4,21 +4,16 @@ import * as config from 'config';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 
-import { LoginDto } from 'src/app/authDto/login.dto';
-import { RegistrDto } from 'src/app/authDto/registr.dto';
-import { UserService } from 'src/user/user.service';
-import * as logger from '../../config/logger';
+import { LoginDto } from './authDto/login.dto';
+import { RegistrDto } from './authDto/registr.dto';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AppService {
-  constructor(
-    private readonly userService: UserService
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   registr(data: RegistrDto) {
-    return this.userService.create(data)
-    .then((usr) => {
-      console.log(usr)
+    return this.userService.create(data).then((usr) => {
       const jwtToken = jwt.sign(
         {
           userId: usr.id,

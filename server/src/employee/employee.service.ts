@@ -14,17 +14,25 @@ export class EmployeeService {
   ) {}
 
   findAll(id: string): Promise<Employee[]> {
-    return this.employeeRepository.find({ departmentId: id }).then((employee) => {
-      if (!employee) {
-        logger.error(`FROM department/:id/employee/ GET ALL -- STATUS ${HttpStatus.NOT_FOUND}`);
-        throw new HttpException(
-          'Internal Server Error',
-          HttpStatus.NOT_FOUND,
-        );
-      } else {
-        return employee;
-      }
-    });
+    return this.employeeRepository
+      .find({ departmentId: id })
+      .then((employee) => {
+        if (!employee) {
+          logger.error(
+            `FROM department/:id/employee/ GET ALL -- STATUS ${HttpStatus.NOT_FOUND}`,
+          );
+          throw new HttpException(
+            'Internal Server Error',
+            HttpStatus.NOT_FOUND,
+          );
+        } else {
+          return employee;
+        }
+      });
+  }
+
+  findByUserId(id: string) {
+    return this.employeeRepository.find({ userId: id });
   }
 
   find(userId: string, depId: string) {
@@ -35,8 +43,9 @@ export class EmployeeService {
   }
 
   async create(data: EmployeeDto): Promise<Employee> {
-    const employees = await this.employeeRepository.find({userId : data.userId})
-    
+    const employees = await this.employeeRepository.find({
+      userId: data.userId,
+    });
     if (!employees[0]) {
       return this.employeeRepository.save(data).then((worker) => {
         if (!worker) {
@@ -52,7 +61,10 @@ export class EmployeeService {
         }
       });
     } else {
-      throw new HttpException(`User is worked in another repository`, HttpStatus.BAD_REQUEST)
+      throw new HttpException(
+        `User is worked in another repository`,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -62,10 +74,7 @@ export class EmployeeService {
       .then((isDeleted) => {
         if (!isDeleted) {
           logger.error(`FROM employee DELETE -- STATUS 404`);
-          throw new HttpException(
-            'User not found',
-            HttpStatus.NOT_FOUND,
-          );
+          throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         } else if (isDeleted.affected === 0) {
           logger.error(
             `FROM employee DELETE  -- STATUS ${HttpStatus.NOT_FOUND}`,
