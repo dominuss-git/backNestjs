@@ -12,8 +12,24 @@ import { UserService } from '../user/user.service';
 export class AppService {
   constructor(private readonly userService: UserService) {}
 
-  registr(data: RegistrDto) {
-    return this.userService.create(data).then((usr) => {
+  async registr(data: RegistrDto) {
+    const usr = await this.userService.create(data);
+    const jwtToken = jwt.sign(
+      {
+        userId: usr.id,
+      },
+      config.get('jwtSecret'),
+      {
+        expiresIn: '1h',
+      },
+    );
+    return { token: jwtToken, userId: usr.id };
+  }
+
+  async login(data: LoginDto) {
+    const usr = await this.userService.findByEmail(data.email);
+    const isMatch = await bcrypt.compare(data.password, usr.password);
+    if (isMatch) {
       const jwtToken = jwt.sign(
         {
           userId: usr.id,
@@ -24,32 +40,8 @@ export class AppService {
         },
       );
       return { token: jwtToken, userId: usr.id };
-    });
-  }
-
-  login(data: LoginDto) {
-    return this.userService
-      .findByEmail(data.email)
-      .then((usr) => {
-        return bcrypt.compare(data.password, usr.password).then((isMatch) => {
-          return { usr, isMatch };
-        });
-      })
-      .then((val) => {
-        if (val.isMatch) {
-          const jwtToken = jwt.sign(
-            {
-              userId: val.usr.id,
-            },
-            config.get('jwtSecret'),
-            {
-              expiresIn: '1h',
-            },
-          );
-          return { token: jwtToken, userId: val.usr.id };
-        } else {
-          throw new HttpException('Wrong Password', HttpStatus.BAD_REQUEST);
-        }
-      });
+    } else {
+      throw new HttpException('Wrong Password', HttpStatus.BAD_REQUEST);
+    }
   }
 }

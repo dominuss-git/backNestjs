@@ -12,41 +12,33 @@ export class DepartmentService {
     private departmentRepository: Repository<Department>,
   ) {}
 
-  findAll(): Promise<Department[]> {
-    return this.departmentRepository.find().then((department) => {
-      if (!department) {
-        logger.error(`FROM departament/ GET -- STATUS ${HttpStatus.NOT_FOUND}`);
-        throw new HttpException('Departments not found', HttpStatus.NOT_FOUND);
-      } else {
-        return department;
-      }
-    });
+  async findAll(): Promise<Department[]> {
+    const department = await this.departmentRepository.find();
+    if (!department) {
+      logger.error(`FROM departament/ GET -- STATUS ${HttpStatus.NOT_FOUND}`);
+      throw new HttpException('Departments not found', HttpStatus.NOT_FOUND);
+    }
+    return department;
   }
 
-  find(id: string): Promise<Department> {
-    return this.departmentRepository.findOne(id).then((department) => {
-      if (!department) {
-        logger.error(
-          `FROM departament/:id GET -- STATUS ${HttpStatus.NOT_FOUND}`,
-        );
-        throw new HttpException('Department not found', HttpStatus.NOT_FOUND);
-      } else {
-        return department;
-      }
-    });
+  async find(id: string): Promise<Department> {
+    const department = await this.departmentRepository.findOne(id);
+    if (!department) {
+      logger.error(
+        `FROM departament/:id GET -- STATUS ${HttpStatus.NOT_FOUND}`,
+      );
+      throw new HttpException('Department not found', HttpStatus.NOT_FOUND);
+    }
+    return department;
   }
 
   async create(data: DepartmentDto): Promise<Department> {
-    return this.departmentRepository.save(data).then((department) => {
-      if (!department) {
-        logger.error(
-          `FROM departament/ POST -- STATUS ${HttpStatus.NOT_FOUND}`,
-        );
-        throw new HttpException("Department is't create", HttpStatus.NOT_FOUND);
-      } else {
-        return department;
-      }
-    });
+    const department = await this.departmentRepository.save(data);
+    if (!department) {
+      logger.error(`FROM departament/ POST -- STATUS ${HttpStatus.NOT_FOUND}`);
+      throw new HttpException("Department is't create", HttpStatus.NOT_FOUND);
+    }
+    return department;
   }
 
   async changeBoss(id: string, bossId: string) {
@@ -69,19 +61,18 @@ export class DepartmentService {
     }
   }
 
-  remove(id: string) {
-    return this.departmentRepository.delete(id).then((isDeleted) => {
-      if (isDeleted.affected === 0) {
-        logger.error(
-          `FROM departament/:id DELETE -- STATUS ${HttpStatus.NOT_FOUND}`,
-        );
-        throw new HttpException('Departament not found', HttpStatus.NOT_FOUND);
-      } else if (isDeleted.affected === 1) {
-        return {
-          message: 'Department deleted',
-          status: HttpStatus.OK,
-        };
-      }
-    });
+  async remove(id: string) {
+    const isDeleted = await this.departmentRepository.delete(id);
+    if (isDeleted.affected === 0) {
+      logger.error(
+        `FROM departament/:id DELETE -- STATUS ${HttpStatus.NOT_FOUND}`,
+      );
+      throw new HttpException('Departament not found', HttpStatus.NOT_FOUND);
+    } else if (isDeleted.affected === 1) {
+      return {
+        message: 'Department deleted',
+        status: HttpStatus.OK,
+      };
+    }
   }
 }

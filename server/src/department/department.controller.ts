@@ -28,25 +28,19 @@ export class DepartmentController {
   @HttpCode(HttpStatus.OK)
   async modify(@Param('id') id: string, @Body() email): Promise<Employee> {
     try {
-      const userId = await this.userService
-        .findByEmail(email.email)
-        .then((usr) => {
-          if (!usr) {
-            throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-          } else {
-            return this.employeeService.find(usr.id, id).then((worker) => {
-              if (worker) {
-                throw new HttpException(
-                  'User is worker on this department yet',
-                  HttpStatus.BAD_REQUEST,
-                );
-              }
-              return usr.id;
-            });
-          }
-        });
+      const usr = await this.userService.findByEmail(email.email);
+      if (!usr) {
+        throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+      }
+      const worker = await this.employeeService.find(usr.id, id);
+      if (worker) {
+        throw new HttpException(
+          'User is worker on this department yet',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       return this.employeeService.create({
-        userId: userId,
+        userId: usr.id,
         departmentId: id,
       });
     } catch (e) {
@@ -62,23 +56,18 @@ export class DepartmentController {
   @HttpCode(HttpStatus.OK)
   async changeBoss(@Param('id') id: string, @Body() email) {
     try {
-      const isChange = await this.userService
-        .checkByEmail(email.email)
-        .then((usr) => {
-          if (!usr) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-          } else {
-            return this.employeeService.find(usr.id, id).then((worker) => {
-              if (!worker) {
-                throw new HttpException(
-                  "User didn't work on this department",
-                  HttpStatus.BAD_REQUEST,
-                );
-              }
-              return this.departmentService.changeBoss(id, usr.id);
-            });
-          }
-        });
+      const usr = await this.userService.checkByEmail(email.email);
+      if (!usr) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      const worker = await this.employeeService.find(usr.id, id);
+      if (!worker) {
+        throw new HttpException(
+          "User didn't work on this department",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const isChange = await this.departmentService.changeBoss(id, usr.id);
       if (isChange.status === 200) {
         return isChange;
       } else {
@@ -89,6 +78,9 @@ export class DepartmentController {
         );
       }
     } catch (e) {
+      if (e.status === 400 || e.status === 404) {
+        throw (e)
+      }
       logger.error(`FROM departament/:id/change PUT ${id} -- ${e} STATUS 500`);
       throw new HttpException(
         'Internal Server Error',
@@ -101,23 +93,19 @@ export class DepartmentController {
   @HttpCode(HttpStatus.OK)
   async find(@Param('id') id: string) {
     try {
-      const data = await this.departmentService.find(id).then((dep) => {
-        return this.employeeService.findAll(id).then((workers) => {
-          return { workers, dep };
-        });
-      });
+      const dep = await this.departmentService.find(id);
+      const workers = await this.employeeService.findAll(id);
       const promices = [];
 
-      for (const val of data.workers) {
+      for (const val of workers) {
         promices.push(this.userService.find(val.userId));
       }
 
-      return Promise.all(promices).then((val) => {
-        return {
-          ...data.dep,
-          users: val,
-        };
-      });
+      const users = await Promise.all(promices);
+      return {
+        ...dep,
+        users: users,
+      };
     } catch (e) {
       logger.error(`FROM departament/:id GET ${id} -- ${e} STATUS 500`);
       throw new HttpException(
@@ -129,14 +117,13 @@ export class DepartmentController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  Get() {
-    return this.departmentService.findAll().then((deps) => {
-      const promises = [];
-      for (const val of deps) {
-        promises.push(this.find(val.id));
-      }
-      return Promise.all(promises);
-    });
+  async Get() {
+    const deps = await this.departmentService.findAll();
+    const promises = [];
+    for (const val of deps) {
+      promises.push(this.find(val.id));
+    }
+    return Promise.all(promises);
   }
 
   @Post('/create')
@@ -148,15 +135,14 @@ export class DepartmentController {
         throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
       }
 
-      const employee = await this.employeeService.findByUserId(data.bossEmail);
+      const employee = await this.employeeService.findByUserId(usr.id);
 
-      if (!employee[0]) {
+      if (employee.length === 0) {
         const dep = await this.departmentService.create({
           name: data.name,
           type: data.type,
           bossId: usr.id,
         });
-
         if (!dep) {
           logger.error(
             `FROM departament/create POST dep -- STATUS ${HttpStatus.BAD_REQUEST}`,
@@ -178,6 +164,10 @@ export class DepartmentController {
         );
       }
     } catch (e) {
+      if (e.status === 400) {
+        throw e
+      }
+
       logger.error(
         `FROM departament/create POST ${data.bossEmail} -- ${e} STATUS 500`,
       );
@@ -192,18 +182,14 @@ export class DepartmentController {
   @HttpCode(HttpStatus.OK)
   async remove(@Param('id') id: string, @Body() userId) {
     try {
-      const dep = await this.departmentService.find(id).then((dep) => {
-        if (dep.bossId !== userId.userId) {
-          throw new HttpException(
-            'You must be boss on this department',
-            HttpStatus.BAD_REQUEST,
-          );
-        } else {
-          return this.employeeService.removeAll(dep.id).then(() => {
-            return dep;
-          });
-        }
-      });
+      const dep = await this.departmentService.find(id);
+      if (dep.bossId !== userId.userId) {
+        throw new HttpException(
+          'You must be boss on this department',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      await this.employeeService.removeAll(dep.id);
 
       return this.departmentService.remove(dep.id);
     } catch (e) {
