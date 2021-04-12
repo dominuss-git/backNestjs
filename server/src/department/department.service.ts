@@ -41,11 +41,21 @@ export class DepartmentService {
     return department;
   }
 
+  async lastUpdate(id: string) {
+    return await this.departmentRepository.update(
+      { id: id },
+      {
+        update: new Date(Date.now())
+      },
+    )
+  }
+
   async changeBoss(id: string, bossId: string) {
     const isChange = await this.departmentRepository.update(
       { id: id },
       {
         bossId: bossId,
+        update: new Date(Date.now())
       },
     );
     if (isChange.affected === 1) {

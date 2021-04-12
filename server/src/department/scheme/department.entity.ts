@@ -19,4 +19,7 @@ export class Department {
 
   @Column({ type: 'date', default: new Date(Date.now()) })
   date: Date;
+
+  @Column({ type: 'date', default: new Date(Date.now()) })
+  update: Date;
 }

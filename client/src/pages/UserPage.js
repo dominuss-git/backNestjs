@@ -15,6 +15,7 @@ export const UserPage = () => {
     if (data.status === 200) {
       setUser(data.body);
       const date_f = new Date(data.body.date);
+      console.log(data.body)
       setDate(`${date_f.getDate()}.${date_f.getMonth() + 1}.${date_f.getFullYear()}`);
     }
   };

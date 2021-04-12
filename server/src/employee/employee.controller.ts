@@ -17,7 +17,8 @@ import * as logger from '../../config/logger';
 
 @Controller('/department/:dep/workers')
 export class EmployeeController {
-  constructor(private employeeService: EmployeeService) {}
+  constructor(
+    private employeeService: EmployeeService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -40,20 +41,6 @@ export class EmployeeController {
       return this.employeeService.create(data);
     } catch (e) {
       logger.error(`FROM department/create POST -- ${e} STATUS 500`);
-      throw new HttpException(
-        'Internal Server Error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Delete('/:id')
-  @HttpCode(HttpStatus.OK)
-  remove(@Param('id') id: string, @Param('dep') depId: string) {
-    try {
-      return this.employeeService.remove(id, depId);
-    } catch (e) {
-      logger.error(`FROM department/:id DELETE ${id} -- ${e} STATUS 500`);
       throw new HttpException(
         'Internal Server Error',
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -31,6 +31,12 @@ export const DepartmentInfo = ({ data }) => {
           <div type="text" readOnly className="form-control-plaintext" id="name">{data.name}</div>
         </div>
       </div>
+      <div className="mb-2 row">
+        <label htmlFor="name" className="col-sm-3 col-form-label fw-bold">Last Update</label>
+        <div className="col-sm-4">
+          <div type="text" readOnly className="form-control-plaintext" id="name">{data.update}</div>
+        </div>
+      </div>
       <table className="table">
         <thead>
           <tr>

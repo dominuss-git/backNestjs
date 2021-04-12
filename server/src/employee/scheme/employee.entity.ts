@@ -11,6 +11,6 @@ export class Employee {
   @Column()
   departmentId: string;
 
-  @Column({ default: Date.now().toString() })
-  date: string;
+  @Column({ type: 'date', default: new Date(Date.now()) })
+  date: Date;
 }

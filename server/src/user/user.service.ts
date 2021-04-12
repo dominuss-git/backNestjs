@@ -50,6 +50,7 @@ export class UserService {
       addressId: usr.addressId.id,
       street: usr.addressId.street,
       home: usr.addressId.home,
+      date: usr.date,
       flat: usr.addressId.flat,
     };
   }

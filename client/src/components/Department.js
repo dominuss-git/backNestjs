@@ -10,6 +10,7 @@ export const Department = ({ data }) => {
   const history = useHistory();
 
   let date = new Date(data.date);
+  // console.log(data)
   date = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
 
   let boss = null;
@@ -50,6 +51,11 @@ export const Department = ({ data }) => {
             Boss :
             {' '}
             {boss.email}
+          </div>
+          <div className="fw-bold">
+            Last Update :
+            {' '}
+            {data.update}
           </div>
         </div>
         <div className="fw-bold d-flex flex-column">

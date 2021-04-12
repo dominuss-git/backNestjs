@@ -39,6 +39,12 @@ export class DepartmentController {
           HttpStatus.BAD_REQUEST,
         );
       }
+      const isChange = await this.departmentService.lastUpdate(id)
+
+      if (isChange.affected !== 1) {
+        throw new HttpException('Department not found', HttpStatus.NOT_FOUND)
+      }
+
       return this.employeeService.create({
         userId: usr.id,
         departmentId: id,
@@ -152,6 +158,10 @@ export class DepartmentController {
             HttpStatus.BAD_REQUEST,
           );
         } else {
+          const isChange = await this.departmentService.lastUpdate(dep.id);
+          if (isChange.affected !== 1) {
+            throw new HttpException('Department not found', HttpStatus.NOT_FOUND)
+          }
           return this.employeeService.create({
             userId: dep.bossId,
             departmentId: dep.id,
@@ -194,6 +204,26 @@ export class DepartmentController {
       return this.departmentService.remove(dep.id);
     } catch (e) {
       logger.error(`FROM departament/:id DELETE ${id} -- ${e} STATUS 500`);
+      throw new HttpException(
+        'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Delete('/:dep/workers/:id')
+  @HttpCode(HttpStatus.OK)
+  async removeEmployee(@Param('id') id: string, @Param('dep') depId: string) {
+    try {
+      const isChange = await this.departmentService.lastUpdate(depId);
+
+      if (isChange.affected !== 1) {
+        throw new HttpException('Department not found', HttpStatus.NOT_FOUND)
+      }
+
+      return this.employeeService.remove(id, depId);
+    } catch (e) {
+      logger.error(`FROM department/:id DELETE ${id} -- ${e} STATUS 500`);
       throw new HttpException(
         'Internal Server Error',
         HttpStatus.INTERNAL_SERVER_ERROR,
