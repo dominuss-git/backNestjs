@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpException,
   HttpStatus,
@@ -12,10 +13,12 @@ import { LoginDto } from './authDto/login.dto';
 import { RegistrDto } from './authDto/registr.dto';
 
 import * as logger from '../../config/logger';
+import { ReqUserAddService } from 'src/microservices/reqUserAdd/req-user-add.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService,
+    private readonly service: ReqUserAddService) {}
 
   @Post('/login')
   @HttpCode(HttpStatus.OK)
@@ -29,6 +32,11 @@ export class AppController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  @Get('/hi')
+  some() {
+    this.service.reqUserAdd()
   }
 
   @Post('/registr')
