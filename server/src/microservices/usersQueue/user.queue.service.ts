@@ -3,21 +3,21 @@ import { HttpService, Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
 
 @Injectable()
-export class ReqUserAddService {
+export class UserAddQueue {
   constructor(
-    @InjectQueue('ReqResUsers')
-    private reqUsersQueue: Queue,
+    @InjectQueue('UsersQueue')
+    private UsersQueue: Queue,
     private readonly httpService: HttpService
   ) {}
 
-  async reqUserAdd() {
+  async userQueueAdd() {
     try {
-      await this.reqUsersQueue.add(
+      await this.UsersQueue.add(
         'userArray', 
-        {users : await this.httpService.get('https://reqres.in/api/users?page=2')},
+        {users : (await this.httpService.get('https://reqres.in/api/users?page=2').toPromise()).data.data},
         {
           repeat : {
-            cron: '*/1 * * * *'
+            cron: '* */1 * * *'
           }
         }
       )

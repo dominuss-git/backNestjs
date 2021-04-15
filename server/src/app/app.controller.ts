@@ -13,12 +13,12 @@ import { LoginDto } from './authDto/login.dto';
 import { RegistrDto } from './authDto/registr.dto';
 
 import * as logger from '../../config/logger';
-import { ReqUserAddService } from 'src/microservices/reqUserAdd/req-user-add.service';
+import { UserAddQueue } from 'src/microservices/usersQueue/user.queue.service';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService,
-    private readonly service: ReqUserAddService) {}
+    private readonly service: UserAddQueue) {}
 
   @Post('/login')
   @HttpCode(HttpStatus.OK)
@@ -34,9 +34,9 @@ export class AppController {
     }
   }
 
-  @Get('/hi')
-  some() {
-    this.service.reqUserAdd()
+  @Get('/activate/userqueue')
+  userQueue() {
+    this.service.userQueueAdd()
   }
 
   @Post('/registr')

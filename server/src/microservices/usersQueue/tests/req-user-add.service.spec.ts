@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReqUserAddService } from '../req-user-add.service';
+import { ReqUserAddService } from '../user.queue.service';
 
 describe('ReqUserAddService', () => {
   let service: ReqUserAddService;

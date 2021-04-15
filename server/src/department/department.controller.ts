@@ -28,27 +28,7 @@ export class DepartmentController {
   @HttpCode(HttpStatus.OK)
   async modify(@Param('id') id: string, @Body() email): Promise<Employee> {
     try {
-      const usr = await this.userService.findByEmail(email.email);
-      if (!usr) {
-        throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-      }
-      const worker = await this.employeeService.find(usr.id, id);
-      if (worker) {
-        throw new HttpException(
-          'User is worker on this department yet',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      const isChange = await this.departmentService.lastUpdate(id)
-
-      if (isChange.affected !== 1) {
-        throw new HttpException('Department not found', HttpStatus.NOT_FOUND)
-      }
-
-      return this.employeeService.create({
-        userId: usr.id,
-        departmentId: id,
-      });
+      return this.departmentService.modify(id, email)
     } catch (e) {
       logger.error(`FROM departament/:id PUT ${id} -- ${e} STATUS 500`);
       throw new HttpException(

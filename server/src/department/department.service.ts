@@ -4,12 +4,16 @@ import { Repository } from 'typeorm';
 import { Department } from './scheme/department.entity';
 import { DepartmentDto } from './departmentDto/department.dto';
 import * as logger from '../../config/logger';
+import { UserService } from '../user/user.service';
+import { EmployeeService } from '../employee/employee.service';
 
 @Injectable()
 export class DepartmentService {
   constructor(
     @InjectRepository(Department)
     private departmentRepository: Repository<Department>,
+    private userService : UserService,
+    private employeeService : EmployeeService
   ) {}
 
   async findAll(): Promise<Department[]> {
@@ -69,6 +73,30 @@ export class DepartmentService {
       );
       throw new HttpException("Boss isn't changed", HttpStatus.NOT_FOUND);
     }
+  }
+
+  async modify(id : string, email) {
+    const usr = await this.userService.findByEmail(email.email);
+      if (!usr) {
+        throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+      }
+      const worker = await this.employeeService.find(usr.id, id);
+      if (worker) {
+        throw new HttpException(
+          'User is worker on this department yet',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const isChange = await this.lastUpdate(id)
+
+      if (isChange.affected !== 1) {
+        throw new HttpException('Department not found', HttpStatus.NOT_FOUND)
+      }
+
+      return this.employeeService.create({
+        userId: usr.id,
+        departmentId: id,
+      });
   }
 
   async remove(id: string) {

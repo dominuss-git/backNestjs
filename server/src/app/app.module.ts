@@ -12,7 +12,7 @@ import { DepartmentModule } from '../department/department.module';
 import { Department } from '../department/scheme/department.entity';
 import { Employee } from '../employee/scheme/employee.entity';
 import { EmployeeModule } from '../employee/employee.module';
-import { ReqUserAddModule } from 'src/microservices/reqUserAdd/req-user-add.module';
+import { ReqUserAddModule } from 'src/microservices/usersQueue/user.queue.module';
 
 @Module({
   imports: [
